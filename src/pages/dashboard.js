@@ -6,7 +6,7 @@ const Dashboard = () => {
     <Container sx={{ p: 3 }}>
       <Grid container direction="column" spacing={0} alignItems="center">
         <Grid item xs={12} justifyContent="center">
-          <Typography variant="h1">Dashboard</Typography>
+          <Typography variant="h3">Dashboard</Typography>
         </Grid>
       </Grid>
     </Container>

@@ -1,37 +1,77 @@
-import { Chart } from "react-chartjs-2";
-import { useState } from "react";
-// import * as tm from "@tensorflow-models/speech-commands";
+import { useState, useEffect } from "react";
+import * as speechCommands from "@tensorflow-models/speech-commands";
+import * as tf from "@tensorflow/tfjs";
 // import Sidebar from "./components/dashboard-sidebar";
 import { Typography, Container, Paper, Grid, Button } from "@mui/material";
+import { Chart } from "react-chartjs-2";
+
+const url = "https://teachablemachine.withgoogle.com/models/TZJQBBpTm/";
+const modelURL = url + "model.json";
+const metadataURL = url + "metadata.json";
+
+// async function createModel() {
+//   const model = speechCommands.create(
+//     "BROWSER_FFT",
+//     undefined,
+//     modelURL,
+//     metadataURL
+//   );
+
+//   await model.ensureModelLoaded();
+
+//   console.log(model.wordLabels());
+
+//   return model;
+// }
 
 const NativePage = () => {
   const [audioData, setAudioData] = useState(null);
   const [action, setAction] = useState(null);
   const [confidence, setConfidence] = useState(null);
+  const [model, setModel] = useState(null);
+  const [labels, setLabels] = useState(null);
 
-  /**
-   * The function starts recording audio using the user's device microphone and initializes a
-   * MediaRecorder object.
-   */
+  const loadModel = async () => {
+    const recognizer = speechCommands.create(
+      "BROWSER_FFT",
+      undefined,
+      modelURL,
+      metadataURL
+    );
+
+    await recognizer.ensureModelLoaded();
+
+    setModel(recognizer);
+    setLabels(recognizer.wordLabels());
+  };
+
+  useEffect(() => {
+    loadModel();
+  }, []);
+
+  const recognizeWords = async () => {
+    console.log("Listening for words");
+
+    model.listen(
+      (result) => {
+        console.log(result.spectogram);
+      },
+      { includeSpectogram: true, probabilityThreshold: 0.9 }
+    );
+
+    //Stop recognition after 3 seconds
+    setTimeout(() => model.stopListening(), 3000);
+  };
+
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
     let chunks = [];
 
-    /* `mediaRecorder.ondataavailable` is an event handler that is triggered when the MediaRecorder
-    object has data available to be processed. In this case, the data is pushed into an array called
-    `chunks`. This array will be used later to create a Blob object that can be used to save or
-    upload the recorded audio. */
     mediaRecorder.ondataavailable = (e) => {
       chunks.push(e.data);
     };
 
-    /* `mediaRecorder.onstop` is an event handler that is triggered when the recording is stopped. In
-    this code block, a new Blob object is created from the recorded audio data stored in the
-    `chunks` array. The Blob object is then converted into a URL using `URL.createObjectURL()`, and
-    the URL is set as the `audioData` state using `setAudioData()`. Finally, the `classifyAudio()`
-    function is called with the Blob object as an argument to classify the recorded audio using a
-    machine learning model. */
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunks, { type: "audio/wav" });
       const audioUrl = URL.createObjectURL(blob);
@@ -39,15 +79,14 @@ const NativePage = () => {
       classifyAudio(blob);
     };
 
-    /* `mediaRecorder.start()` starts recording audio using the device microphone and initializes a
-    MediaRecorder object. */
     mediaRecorder.start();
     setTimeout(() => {
       mediaRecorder.stop();
     }, 3000);
   };
 
-  const classifyAudio = async (audioBlob) => {};
+  const classifyAudio = async (audioBlob) => {
+  };
 
   return (
     <Container sx={{ p: 3 }}>
@@ -59,17 +98,22 @@ const NativePage = () => {
         justifyContent="center"
       >
         <Grid item xs={12} alignItems="center">
-          <Typography variant="h1">Native English Speakers</Typography>
+          <Typography variant="h3">Native English Speakers</Typography>
         </Grid>
         <Paper sx={{ my: 2, p: 2 }}>
           <Typography variant="body1">
             Compare your English to a native English Speaker
           </Typography>
           <div>
-            <Button variant="contained" onClick={startRecording}>
+            <Button variant="contained" onClick={recognizeWords}>
               Record Audio
             </Button>
             {audioData && <audio src={audioData} controls />}
+            {action && (
+              <div>
+                Predicted Action: {action} ({confidence}% confidence)
+              </div>
+            )}
             <canvas id="chart" width="400" height="400" />
           </div>
         </Paper>
@@ -78,5 +122,5 @@ const NativePage = () => {
   );
 };
 
-//Give me a template for a blog post in react and mui
+//Give me a teachable machine code that accepts audio and checks its' confidence in react
 export default NativePage;

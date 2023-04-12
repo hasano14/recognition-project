@@ -73,6 +73,5 @@ const App = () => {
     </Router>
   );
 };
-//How to make distance between typography by using mui
 
 export default App;
