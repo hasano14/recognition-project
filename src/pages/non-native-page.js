@@ -1,34 +1,116 @@
-import React, { useState } from "react";
-import { Grid, Container, Typography, Paper, Button } from "@mui/material";
+import { useState, useEffect } from "react";
+import * as speechCommands from "@tensorflow-models/speech-commands";
+import * as tf from "@tensorflow/tfjs";
+import { Typography, Container, Paper, Grid, Button, Box } from "@mui/material";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+import wordList from "../wordlist/wordList";
 
-const NonNativePage = (props) => {
-  const [audioData, setAudioData] = useState(null);
+/* `const url = "https://teachablemachine.withgoogle.com/models/TZJQBBpTm/";` is setting the URL for
+the Teachable Machine model that will be used for speech recognition. The model is loaded in the
+`loadModel` function using this URL concatenated with "model.json" and "metadata.json". */
+const url = "https://teachablemachine.withgoogle.com/models/TZJQBBpTm/";
+
+const NonNativePage = () => {
   const [action, setAction] = useState(null);
-  const [confidence, setConfidence] = useState(null);
+  const [confidence, setConfidence] = useState("0");
+  const [labels, setLabels] = useState(null);
+  const [startCountdown, setStartCountdown] = useState(false);
+  const [key, setKey] = useState(0);
+  const [model, setModel] = useState(null);
+  const [disableButton, setDisableButton] = useState(true);
 
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    let chunks = [];
+  const modelURL = url + "model.json";
+  const metadataURL = url + "metadata.json";
 
-    mediaRecorder.ondataavailable = (e) => {
-      chunks.push(e.data);
-    };
+  //Load the model
+  const loadModel = async () => {
+    const recognizer = speechCommands.create(
+      "BROWSER_FFT",
+      undefined, //speech commands options not needed for this example
+      modelURL,
+      metadataURL
+    );
 
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(chunks, { type: "audio/wav" });
-      const audioUrl = URL.createObjectURL(blob);
-      setAudioData(audioUrl);
-      classifyAudio(blob);
-    };
+    //Check if the model is loaded
+    await recognizer.ensureModelLoaded();
 
-    mediaRecorder.start();
-    setTimeout(() => {
-      mediaRecorder.stop();
-    }, 3000);
+    /* This line of code is checking if the `wordLabels()` method of the `recognizer` object returns a
+    non-null value. If it does, it sets the `disableButton` state to `false`, which enables the
+    "Start" button for speech recognition. If it returns null, it sets the `disableButton` state to
+    `true`, which disables the "Start" button. */
+    recognizer.wordLabels() !== null
+      ? setDisableButton(false)
+      : setDisableButton(true);
+
+    setModel(recognizer);
+
+    //Console log the word labels for the model
+    console.log(recognizer.wordLabels());
+
+    //Set the labels
+    setLabels(recognizer.wordLabels());
+
+    return recognizer;
   };
 
-  const classifyAudio = async (audioBlob) => {};
+  useEffect(() => {
+    loadModel();
+  }, []);
+
+  function argMax(arr) {
+    return arr.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+  }
+
+  const recognizeWords = async () => {
+    console.log("Listening for words");
+
+    setStartCountdown(true);
+    setKey((prev) => prev + 1);
+
+    model.listen(
+      (result) => {
+        setAction(labels[argMax(Object.values(result.scores))]);
+        setConfidence(result.scores[argMax(Object.values(result.scores))]);
+      },
+      {
+        includeSpectrogram: true,
+        probabilityThreshold: 0.9,
+        invokeCallbackOnNoiseAndUnkown: true,
+        overlapFactor: 0.5,
+      }
+    );
+
+    //Stop recognition after 3 seconds
+    setTimeout(() => model.stopListening(), 3000);
+  };
+
+  const renderTime = ({ remainingTime }) => {
+    if (remainingTime === 0) {
+      return (
+        <Button variant="contained" onClick={recognizeWords}>
+          Try Again
+        </Button>
+      );
+    } else {
+      return (
+        <>
+          {startCountdown ? (
+            <Button variant="contained" disabled>
+              {remainingTime}
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={recognizeWords}
+              disabled={disableButton}
+            >
+              Start
+            </Button>
+          )}
+        </>
+      );
+    }
+  };
 
   return (
     <Container sx={{ p: 3 }}>
@@ -43,16 +125,83 @@ const NonNativePage = (props) => {
           <Typography variant="h3">Non-Native English Speakers</Typography>
         </Grid>
         <Paper sx={{ my: 2, p: 2 }}>
-          <Typography variant="body1">
-            Compare your english to a non-native English speaker
-          </Typography>
-          <div>
-            <Button variant="contained" onClick={startRecording}>
-              Record Audio
-            </Button>
-            {audioData && <audio src={audioData} controls />}
-            <canvas id="chart" width="400" height="400" />
-          </div>
+          <Grid
+            container
+            splacing={1}
+            justifyContent="center"
+            direction="column"
+            alignItems="center"
+          >
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ py: 2 }}>
+                Compare your English to a non-native English Speaker
+              </Typography>
+            </Grid>
+            {/* Timer */}
+            <Grid item xs={12} sx={{ py: 2 }}>
+              <div className="timer-wrapper">
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                  <CountdownCircleTimer
+                    key={key}
+                    isPlaying={startCountdown}
+                    duration={3}
+                    colors={["#004777"]}
+                    onComplete={() => ({ shouldRepeat: false })}
+                    display="flex"
+                  >
+                    {renderTime}
+                  </CountdownCircleTimer>
+                </Box>
+              </div>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ py: 2 }}>
+                Confidence: {(confidence * 100).toFixed(2)}%
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={10}>
+              <Grid container spacing={1} sx={{ p: 2 }}>
+                {wordList.map((word) => (
+                  <Grid item xs={3} md={2} xl={2}>
+                    {action === word.id && action != null ? (
+                      <Box
+                        word={word.word}
+                        sx={{
+                          backgroundColor: "#004777",
+                          borderRadius: 1,
+                          fontSize: 20,
+                          px: 2,
+                          py: 1,
+                          transition: "all 0.3s ease-in-out",
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "white", fontSize: 20 }}
+                        >
+                          {word.word}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box
+                        sx={{
+                          opacity: [0.9, 0.8, 0.7],
+                          fontSize: 20,
+                          px: 2,
+                          py: 1,
+                          outline: "1px solid #004777",
+                          borderRadius: 1,
+                          transition: "all 0.3s ease-in-out",
+                        }}
+                      >
+                        {word.word}
+                      </Box>
+                    )}
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+          </Grid>
         </Paper>
       </Grid>
     </Container>

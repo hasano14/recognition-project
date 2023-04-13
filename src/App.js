@@ -17,6 +17,7 @@ import {
   Toolbar,
   IconButton,
 } from "@mui/material";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -44,27 +45,29 @@ const items = [
 ];
 
 const App = () => {
-  const { activeMenu } = useStateContext();
   return (
     <Router>
-      {/* {activeMenu ? <Sidebar active={true} /> : <Sidebar active={false} />} */}
-      <Container sx={{ pt: 2 }} maxWidth="xl">
-        <NavLink to="/">
-          <Typography variant="button" sx={{ mr: 1 }}>
-            Home
+      <AppBar position="static" sx={{ background: "#004777" }}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Link to="/">
+              <Typography variant="button" sx={{ mx: 1, color: "white" }}>
+                Home
+              </Typography>
+            </Link>
+            <Link to="/native">
+              <Typography variant="button" sx={{ mr: 1, color: "white" }}>
+                Native Speakers
+              </Typography>
+            </Link>
+            <Link to="/nonnative">
+              <Typography variant="button" sx={{ mr: 1, color: "white" }}>
+                Non-Native Speakers
+              </Typography>
+            </Link>
           </Typography>
-        </NavLink>
-        <NavLink to="/native">
-          <Typography variant="button" sx={{ mr: 1 }}>
-            Native Speakers
-          </Typography>
-        </NavLink>
-        <NavLink to="/nonnative">
-          <Typography variant="button" sx={{ mr: 1 }}>
-            Non-Native Speakers
-          </Typography>
-        </NavLink>
-      </Container>
+        </Toolbar>
+      </AppBar>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/native" element={<NativePage />} />
