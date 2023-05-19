@@ -10,9 +10,14 @@ import { blue } from "@mui/material/colors";
 /* `const url = "https://teachablemachine.withgoogle.com/models/HXW3FkUYI/";` is setting the URL for
 the Teachable Machine model that will be used for speech recognition. The model is hosted on the
 Teachable Machine website and can be accessed using this URL. */
-const url = "https://teachablemachine.withgoogle.com/models/HXW3FkUYI/";
+// const url = "https://teachablemachine.withgoogle.com/models/HXW3FkUYI/";
+const wordUrlArray = [
+  { id: "Act", url: "QCCgmtRNw" },
+  { id: "Bed", url: "4Nx8SytsJ" },
+  { id: "Clap", url: "b0NWJ3mdp" },
+];
 
-const NativePage = () => {
+const Testing = () => {
   const [action, setAction] = useState(null);
   const [confidence, setConfidence] = useState("0");
   const [labels, setLabels] = useState(null);
@@ -21,39 +26,80 @@ const NativePage = () => {
   const [checkTrue, setCheckTrue] = useState(true);
   const [model, setModel] = useState(null);
   const [disableButton, setDisableButton] = useState(true);
+  const [url, setUrl] = useState("setup");
+  const [modelURL, setModelURL] = useState(null);
+  const [metadataURL, setMetadataURL] = useState(null);
+  const [currentURL, setCurrentURL] = useState(null);
+  const [allowLoad, setAllowLoad] = useState(false);
+  const [currentWord, setCurrentWord] = useState(null);
+  const [currentWordURL, setCurrentWordURL] = useState(null);
 
-  const modelURL = url + "model.json";
-  const metadataURL = url + "metadata.json";
+  // //Select the word to test
+  // const selectWord = (id) => {
+  //   console.log("Current ID = " + id);
+  //   const Word = wordUrlArray.find((word) => word.id === id);
+  //   if (Word !== currentWord) {
+  //     setUrl(null);
+  //     setAllUrl(Word.url);
 
-  //Load the model
+  //     if (url !== null) {
+  //       setCurrentWord(Word);
+  //       setAllowLoad(true);
+  //       loadModel();
+  //     }
+  //   }
+  // };
+
+  //Selecting the words
+  const selectWord = (id) => {
+    const wordUrl = wordUrlArray.find((word) => word.id === id);
+
+    if (url !== null || url === "setup") {
+      setUrl("setup");
+    }
+
+    if (url !== null || url === "setup") {
+      setUrl(
+        "https://teachablemachine.withgoogle.com/models/" + wordUrl.url + "/"
+      );
+      //Check the current ID
+      console.log("Current Word = " + id);
+
+      setModelURL(url + "model.json");
+      setMetadataURL(url + "metadata.json");
+      setDisableButton(true);
+
+      console.log("URL: " + url);
+    }
+  };
+
   const loadModel = async () => {
-    const recognizer = speechCommands.create(
-      "BROWSER_FFT",
-      undefined, //speech commands options not needed for this example
-      modelURL,
-      metadataURL
-    );
+    //Only enable loading when url is not null and not equal to "setup"
+    if (url !== null && url !== "setup") {
+      const recognizer = new speechCommands.create(
+        "BROWSER_FFT",
+        undefined, //speech commands options not needed for this example
+        modelURL,
+        metadataURL
+      );
 
-    //Check if the model is loaded
-    await recognizer.ensureModelLoaded();
+      console.log("Loaded URL: " + url);
 
-    /* This line of code is checking if the `wordLabels()` method of the `recognizer` object returns a
-    non-null value. If it does, it sets the `disableButton` state to `false`, which enables the
-    "Start" button for speech recognition. If it returns null, it sets the `disableButton` state to
-    `true`, which disables the "Start" button. */
-    recognizer.wordLabels() !== null
-      ? setDisableButton(false)
-      : setDisableButton(true);
+      //If model is loaded, set the `disableButton` state to `false`, which enables the "Start" button for speech recognition.
+      if ((await recognizer.ensureModelLoaded()) === true) {
+        setDisableButton(false);
+        console.log("Model loaded");
+      }
 
-    setModel(recognizer);
+      setModel(recognizer);
 
-    //Console log the word labels for the model
-    console.log(recognizer.wordLabels());
+      console.log(recognizer.wordLabels());
 
-    //Set the labels
-    setLabels(recognizer.wordLabels());
+      setLabels(recognizer.wordLabels());
 
-    return recognizer;
+      setAllowLoad(false);
+      return recognizer;
+    }
   };
 
   useEffect(() => {
@@ -125,7 +171,7 @@ const NativePage = () => {
         justifyContent="center"
       >
         <Grid item xs={12} alignItems="center">
-          <Typography variant="h3">Native English Speakers</Typography>
+          <Typography variant="h3">Testing</Typography>
         </Grid>
         <Paper sx={{ my: 2, p: 2 }}>
           <Grid
@@ -137,31 +183,29 @@ const NativePage = () => {
           >
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ py: 2 }}>
-                Compare your English to a native English Speaker
+                This page is for testing purposes.
               </Typography>
             </Grid>
+
             <Grid item xs={12} sx={{ py: 2 }}>
-              <div className="timer-wrapper">
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
-                  <CountdownCircleTimer
-                    key={key}
-                    isPlaying={startCountdown}
-                    duration={3}
-                    colors={["#004777"]}
-                    onComplete={() => ({ shouldRepeat: false })}
-                    display="flex"
-                  >
-                    {renderTime}
-                  </CountdownCircleTimer>
-                </Box>
-              </div>
+              <Grid item xs={12} sx={{ py: 2 }}>
+                <div className="timer-wrapper">
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <CountdownCircleTimer
+                      key={key}
+                      isPlaying={startCountdown}
+                      duration={3}
+                      colors={["#004777"]}
+                      onComplete={() => ({ shouldRepeat: false })}
+                      display="flex"
+                    >
+                      {renderTime}
+                    </CountdownCircleTimer>
+                  </Box>
+                </div>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h6" sx={{ py: 2 }}>
-                Confidence: {(confidence * 100).toFixed(2)}%
-              </Typography>
-            </Grid>
-            
+
             <Grid item xs={12} md={10}>
               <Grid container spacing={1} sx={{ p: 2 }}>
                 {wordList.map((word) => (
@@ -196,8 +240,9 @@ const NativePage = () => {
                           borderRadius: 1,
                           transition: "all 0.3s ease-in-out",
                         }}
+                        onClick={() => selectWord(word.id)}
                       >
-                        {word.word}
+                        <Button>{word.word}</Button>
                       </Box>
                     )}
                   </Grid>
@@ -211,4 +256,4 @@ const NativePage = () => {
   );
 };
 
-export default NativePage;
+export default Testing;

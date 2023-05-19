@@ -2,6 +2,7 @@ import { Chart } from "react-chartjs-2";
 import Dashboard from "./pages/dashboard";
 import NativePage from "./pages/native-page";
 import NonNativePage from "./pages/non-native-page";
+import Testing from "./pages/testing";
 
 import { useState } from "react";
 // import * as tm from "@tensorflow-models/speech-commands";
@@ -42,6 +43,10 @@ const items = [
     href: "/nonnative",
     title: "Non-Native English Speaker",
   },
+  {
+    href: "/testing",
+    title: "Testing"
+  }
 ];
 
 const App = () => {
@@ -65,6 +70,11 @@ const App = () => {
                 Non-Native Speakers
               </Typography>
             </Link>
+            <Link to="/testing">
+              <Typography variant="button" sx={{ mr: 1, color: "white" }}>
+                testing
+              </Typography>
+            </Link>
           </Typography>
         </Toolbar>
       </AppBar>
@@ -72,6 +82,7 @@ const App = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/native" element={<NativePage />} />
         <Route path="/nonnative" element={<NonNativePage />} />
+        <Route path="/testing" element={<Testing />} />
       </Routes>
     </Router>
   );

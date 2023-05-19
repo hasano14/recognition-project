@@ -3,30 +3,41 @@ import * as speechCommands from "@tensorflow-models/speech-commands";
 import * as tf from "@tensorflow/tfjs";
 import { Typography, Container, Paper, Grid, Button, Box } from "@mui/material";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
-import { Chart } from "react-chartjs-2";
 import wordList from "../wordlist/wordList";
-import { blue } from "@mui/material/colors";
 
-/* `const url = "https://teachablemachine.withgoogle.com/models/HXW3FkUYI/";` is setting the URL for
-the Teachable Machine model that will be used for speech recognition. The model is hosted on the
-Teachable Machine website and can be accessed using this URL. */
-const url = "https://teachablemachine.withgoogle.com/models/HXW3FkUYI/";
+const urlArray = [
+  { id: "Act", url: "QCCgmtRNw" },
+  { id: "Bed", url: "4Nx8SytsJ" },
+  { id: "Clap", url: "b0NWJ3mdp" },
+];
 
-const NativePage = () => {
-  const [action, setAction] = useState(null);
-  const [confidence, setConfidence] = useState("0");
-  const [labels, setLabels] = useState(null);
+const Testing = () => {
+  const [button, setButton] = useState(true);
   const [startCountdown, setStartCountdown] = useState(false);
   const [key, setKey] = useState(0);
-  const [checkTrue, setCheckTrue] = useState(true);
+  const [action, setAction] = useState(null);
+  const [confidence, setConfidence] = useState("0");
   const [model, setModel] = useState(null);
-  const [disableButton, setDisableButton] = useState(true);
+  const [labels, setLabels] = useState(null);
+  const [chosenWord, setChosenWord] = useState(null);
 
-  const modelURL = url + "model.json";
-  const metadataURL = url + "metadata.json";
+  const selectWord = (id) => {
+    const wordUrl = urlArray.find((word) => word.id === id);
+    setButton(true);
+    setChosenWord(wordUrl.id);
+    console.log("Chosen Word = " + wordUrl.id);
+    console.log("Chosen URL = " + wordUrl.url);
+    loadModel(wordUrl.url);
+  };
 
-  //Load the model
-  const loadModel = async () => {
+  const loadModel = async (url) => {
+    const modelURL =
+      "https://teachablemachine.withgoogle.com/models/" + url + "/model.json";
+    const metadataURL =
+      "https://teachablemachine.withgoogle.com/models/" +
+      url +
+      "/metadata.json";
+
     const recognizer = speechCommands.create(
       "BROWSER_FFT",
       undefined, //speech commands options not needed for this example
@@ -36,39 +47,25 @@ const NativePage = () => {
 
     //Check if the model is loaded
     await recognizer.ensureModelLoaded();
-
-    /* This line of code is checking if the `wordLabels()` method of the `recognizer` object returns a
-    non-null value. If it does, it sets the `disableButton` state to `false`, which enables the
-    "Start" button for speech recognition. If it returns null, it sets the `disableButton` state to
-    `true`, which disables the "Start" button. */
-    recognizer.wordLabels() !== null
-      ? setDisableButton(false)
-      : setDisableButton(true);
+    console.log("Loaded URL = " + url);
+    console.log(recognizer.wordLabels());
+    setButton(false);
 
     setModel(recognizer);
-
-    //Console log the word labels for the model
-    console.log(recognizer.wordLabels());
-
-    //Set the labels
     setLabels(recognizer.wordLabels());
 
     return recognizer;
   };
-
-  useEffect(() => {
-    loadModel();
-  }, []);
 
   function argMax(arr) {
     return arr.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
   }
 
   const recognizeWords = async () => {
-    console.log("Listening for words");
+    console.log("Recognizing words");
 
     setStartCountdown(true);
-    setKey((prev) => prev + 1);
+    setKey((prevKey) => prevKey + 1);
 
     model.listen(
       (result) => {
@@ -78,22 +75,17 @@ const NativePage = () => {
       {
         includeSpectrogram: true,
         probabilityThreshold: 0.9,
-        invokeCallbackOnNoiseAndUnkown: true,
+        invokeCallbackOnNoiseAndUnknown: true,
         overlapFactor: 0.5,
       }
     );
 
-    //Stop recognition after 3 seconds
     setTimeout(() => model.stopListening(), 3000);
   };
 
   const renderTime = ({ remainingTime }) => {
     if (remainingTime === 0) {
-      return (
-        <Button variant="contained" onClick={recognizeWords}>
-          Try Again
-        </Button>
-      );
+      return <Button variant="contained">Try Again</Button>;
     } else {
       return (
         <>
@@ -105,7 +97,7 @@ const NativePage = () => {
             <Button
               variant="contained"
               onClick={recognizeWords}
-              disabled={disableButton}
+              disabled={button}
             >
               Start
             </Button>
@@ -125,7 +117,7 @@ const NativePage = () => {
         justifyContent="center"
       >
         <Grid item xs={12} alignItems="center">
-          <Typography variant="h3">Native English Speakers</Typography>
+          <Typography variant="h3">Testing</Typography>
         </Grid>
         <Paper sx={{ my: 2, p: 2 }}>
           <Grid
@@ -137,7 +129,7 @@ const NativePage = () => {
           >
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ py: 2 }}>
-                Compare your English to a native English Speaker
+                This page is for testing purposes.
               </Typography>
             </Grid>
             <Grid item xs={12} sx={{ py: 2 }}>
@@ -156,50 +148,58 @@ const NativePage = () => {
                 </Box>
               </div>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{ alignItems: "center" }}>
               <Typography variant="h6" sx={{ py: 2 }}>
-                Confidence: {(confidence * 100).toFixed(2)}%
+                Reference Word:
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: "#004777",
+                    fontSize: 24,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {chosenWord}
+                </Typography>
               </Typography>
             </Grid>
-            
+
             <Grid item xs={12} md={10}>
               <Grid container spacing={1} sx={{ p: 2 }}>
                 {wordList.map((word) => (
                   <Grid item xs={3} md={2} xl={2}>
-                    {action === word.id && action != null ? (
-                      <Box
-                        word={word.word}
+                    <Box
+                      word={word.word}
+                      sx={{
+                        backgroundColor: "#004777",
+                        borderRadius: 1,
+                        fontSize: 20,
+                        py: 1,
+                        transition: "all 0.3s linear",
+                      }}
+                    >
+                      <Button
+                        variant="body2"
                         sx={{
-                          backgroundColor: "#004777",
-                          borderRadius: 1,
-                          fontSize: 20,
-                          px: 2,
-                          py: 1,
-                          transition: "all 0.3s ease-in-out",
+                          color: "white",
+                          textAlign: "center",
                         }}
+                        onClick={() => selectWord(word.id)}
+                        fullWidth
                       >
                         <Typography
-                          variant="body2"
-                          sx={{ color: "white", fontSize: 20 }}
+                          sx={{
+                            variant: "body2",
+                            color: "white",
+                            fontSize: 12,
+                            textAlign: "center",
+                          }}
                         >
                           {word.word}
                         </Typography>
-                      </Box>
-                    ) : (
-                      <Box
-                        sx={{
-                          opacity: [0.9, 0.8, 0.7],
-                          fontSize: 20,
-                          px: 2,
-                          py: 1,
-                          outline: "1px solid #004777",
-                          borderRadius: 1,
-                          transition: "all 0.3s ease-in-out",
-                        }}
-                      >
-                        {word.word}
-                      </Box>
-                    )}
+                      </Button>
+                    </Box>
                   </Grid>
                 ))}
               </Grid>
@@ -211,4 +211,4 @@ const NativePage = () => {
   );
 };
 
-export default NativePage;
+export default Testing;
