@@ -9,6 +9,55 @@ const urlArray = [
   { id: "Act", url: "QCCgmtRNw" },
   { id: "Bed", url: "4Nx8SytsJ" },
   { id: "Clap", url: "b0NWJ3mdp" },
+  { id: "Dart", url: "" },
+  { id: "Ear", url: "" },
+  { id: "For", url: "" },
+  { id: "Get", url: "" },
+  { id: "Here", url: "" },
+  { id: "If", url: "" },
+  { id: "Job", url: "" },
+  { id: "Kid", url: "" },
+  { id: "Late", url: "" },
+  { id: "Make", url: "" },
+  { id: "Name", url: "" },
+  { id: "Odd", url: "" },
+  { id: "Pea", url: "" },
+  { id: "Quick", url: "" },
+  { id: "Read", url: "" },
+  { id: "Soak", url: "" },
+  { id: "Tall", url: "" },
+  { id: "Up", url: "" },
+  { id: "Vase", url: "" },
+  { id: "Wait", url: "" },
+  { id: "Mix", url: "" },
+  { id: "Yes", url: "" },
+  { id: "Zen", url: "" },
+  { id: "Apple", url: "hQbejdpIU" },
+  { id: "Body", url: "URfdKLZaE" },
+  { id: "Chicken", url: "" },
+  { id: "Dino", url: "" },
+  { id: "Easy", url: "" },
+  { id: "Fire", url: "" },
+  { id: "Going", url: "" },
+  { id: "Happy", url: "" },
+  { id: "Into", url: "" },
+  { id: "July", url: "" },
+  { id: "Kilo", url: "" },
+  { id: "Later", url: "" },
+  { id: "Menu", url: "" },
+  { id: "Ninety", url: "" },
+  { id: "Oval", url: "" },
+  { id: "Pizza", url: "" },
+  { id: "Quicker", url: "" },
+  { id: "River", url: "" },
+  { id: "Sorry", url: "" },
+  { id: "Thirty", url: "" },
+  { id: "Unit", url: "" },
+  { id: "Very", url: "" },
+  { id: "Water", url: "" },
+  { id: "Xmas", url: "" },
+  { id: "Yellow", url: "" },
+  { id: "Zebra", url: "" }
 ];
 
 const Testing = () => {
@@ -63,6 +112,7 @@ const Testing = () => {
 
   const recognizeWords = async () => {
     console.log("Recognizing words");
+    setAction(null);
 
     setStartCountdown(true);
     setKey((prevKey) => prevKey + 1);
@@ -74,18 +124,22 @@ const Testing = () => {
       },
       {
         includeSpectrogram: true,
-        probabilityThreshold: 0.9,
+        probabilityThreshold: 0.6,
         invokeCallbackOnNoiseAndUnknown: true,
         overlapFactor: 0.5,
       }
     );
 
-    setTimeout(() => model.stopListening(), 3000);
+    setTimeout(() => model.stopListening(), 2000);
   };
 
   const renderTime = ({ remainingTime }) => {
     if (remainingTime === 0) {
-      return <Button variant="contained">Try Again</Button>;
+      return (
+        <Button variant="contained" onClick={recognizeWords} disabled={button}>
+          Try Again
+        </Button>
+      );
     } else {
       return (
         <>
@@ -129,7 +183,8 @@ const Testing = () => {
           >
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ py: 2 }}>
-                This page is for testing purposes.
+                This page is to test if the model is able to recognize the words
+                that you have trained it to recognize.
               </Typography>
             </Grid>
             <Grid item xs={12} sx={{ py: 2 }}>
@@ -138,7 +193,7 @@ const Testing = () => {
                   <CountdownCircleTimer
                     key={key}
                     isPlaying={startCountdown}
-                    duration={3}
+                    duration={2}
                     colors={["#004777"]}
                     onComplete={() => ({ shouldRepeat: false })}
                     display="flex"
@@ -161,6 +216,20 @@ const Testing = () => {
                   }}
                 >
                   {chosenWord}
+                </Typography>
+              </Typography>
+              <Typography variant="h6" sx={{ py: 2 }}>
+                Hypothesis Word:
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: "#004777",
+                    fontSize: 24,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {action}
                 </Typography>
               </Typography>
             </Grid>
