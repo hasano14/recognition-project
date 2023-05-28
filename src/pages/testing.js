@@ -57,7 +57,7 @@ const urlArray = [
   { id: "Water", url: "" },
   { id: "Xmas", url: "" },
   { id: "Yellow", url: "" },
-  { id: "Zebra", url: "" }
+  { id: "Zebra", url: "" },
 ];
 
 const Testing = () => {
@@ -171,7 +171,7 @@ const Testing = () => {
         justifyContent="center"
       >
         <Grid item xs={12} alignItems="center">
-          <Typography variant="h3">Testing</Typography>
+          <Typography variant="h3">Non-Native English ASR</Typography>
         </Grid>
         <Paper sx={{ my: 2, p: 2 }}>
           <Grid
@@ -183,8 +183,7 @@ const Testing = () => {
           >
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ py: 2 }}>
-                This page is to test if the model is able to recognize the words
-                that you have trained it to recognize.
+                Test your pronunciation if it is understandable by the machine
               </Typography>
             </Grid>
             <Grid item xs={12} sx={{ py: 2 }}>
@@ -234,45 +233,55 @@ const Testing = () => {
               </Typography>
             </Grid>
 
-            <Grid item xs={12} md={10}>
-              <Grid container spacing={1} sx={{ p: 2 }}>
-                {wordList.map((word) => (
-                  <Grid item xs={3} md={2} xl={2}>
-                    <Box
-                      word={word.word}
-                      sx={{
-                        backgroundColor: "#004777",
-                        borderRadius: 1,
-                        fontSize: 20,
-                        py: 1,
-                        transition: "all 0.3s linear",
-                      }}
-                    >
-                      <Button
-                        variant="body2"
-                        sx={{
-                          color: "white",
-                          textAlign: "center",
-                        }}
-                        onClick={() => selectWord(word.id)}
-                        fullWidth
-                      >
-                        <Typography
+            <Box
+              sx={{
+                justifyContent: "center",
+              }}
+            >
+              {wordList.map((title) => (
+                <>
+                  <Typography variant="h5" sx={{ pt: 2 }}>
+                    {title.title}
+                  </Typography>
+                  <Grid container spacing={1} sx={{ p: 2 }}>
+                    {title.words.map((word) => (
+                      <Grid item xs={3} md={2} xl={2}>
+                        <Box
+                          word={word.word}
                           sx={{
-                            variant: "body2",
-                            color: "white",
-                            fontSize: 12,
-                            textAlign: "center",
+                            px: 2,
+                            border: 1,
+                            backgroundColor: "#004777",
+                            borderRadius: 1,
                           }}
                         >
-                          {word.word}
-                        </Typography>
-                      </Button>
-                    </Box>
+                          <Button
+                            variant="body2"
+                            onClick={() => selectWord(word.id)}
+                            fullWidth
+                            sx={{
+                              color: "white",
+                            }}
+                          >
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                color: "white",
+                                fontSize: 16,
+                                textAlign: "center",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {word.word}
+                            </Typography>
+                          </Button>
+                        </Box>
+                      </Grid>
+                    ))}
                   </Grid>
-                ))}
-              </Grid>
-            </Grid>
+                </>
+              ))}
+            </Box>
           </Grid>
         </Paper>
       </Grid>
