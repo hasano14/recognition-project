@@ -76,16 +76,22 @@ const Testing = () => {
     setChosenWord(wordUrl.id);
     console.log("Chosen Word = " + wordUrl.id);
     console.log("Chosen URL = " + wordUrl.url);
-    loadModel(wordUrl.url);
+    loadModel(wordUrl.url, wordUrl.id);
   };
 
-  const loadModel = async (url) => {
-    const modelURL =
-      "https://teachablemachine.withgoogle.com/models/" + url + "/model.json";
-    const metadataURL =
-      "https://teachablemachine.withgoogle.com/models/" +
-      url +
-      "/metadata.json";
+  const loadModel = async (url, id) => {
+    //Online recognizing
+    // const modelURL =
+    //   "https://teachablemachine.withgoogle.com/models/" + url + "/model.json";
+    // const metadataURL =
+    //   "https://teachablemachine.withgoogle.com/models/" +
+    //   url +
+    //   "/metadata.json";
+
+
+    //Offline recognizing
+    const modelURL = "./Act_Model/model.json";
+    const metadataURL = "./Act_Model/metadata.json";
 
     const recognizer = speechCommands.create(
       "BROWSER_FFT",
