@@ -1,3 +1,5 @@
+//TODO: 1. Add a delay of 2 seconds before the recording starts
+
 import { useState, useEffect } from "react";
 import * as speechCommands from "@tensorflow-models/speech-commands";
 import * as tf from "@tensorflow/tfjs";
