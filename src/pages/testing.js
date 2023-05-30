@@ -83,17 +83,16 @@ const Testing = () => {
 
   const loadModel = async (url, id) => {
     //Online recognizing
-    // const modelURL =
-    //   "https://teachablemachine.withgoogle.com/models/" + url + "/model.json";
-    // const metadataURL =
-    //   "https://teachablemachine.withgoogle.com/models/" +
-    //   url +
-    //   "/metadata.json";
+    const modelURL =
+      "https://teachablemachine.withgoogle.com/models/" + url + "/model.json";
+    const metadataURL =
+      "https://teachablemachine.withgoogle.com/models/" +
+      url +
+      "/metadata.json";
 
-
-    //Offline recognizing
-    const modelURL = "./Act_Model/model.json";
-    const metadataURL = "./Act_Model/metadata.json";
+    // //Offline recognizing
+    // const modelURL = "./Act_Model/model.json";
+    // const metadataURL = "./Act_Model/metadata.json";
 
     const recognizer = speechCommands.create(
       "BROWSER_FFT",
@@ -132,13 +131,18 @@ const Testing = () => {
       },
       {
         includeSpectrogram: true,
+        //
         probabilityThreshold: 0.6,
-        invokeCallbackOnNoiseAndUnknown: true,
+        invokeCallbackOnNoiseAndUnknown: false,
         overlapFactor: 0.5,
       }
     );
 
-    setTimeout(() => model.stopListening(), 2000);
+    //As long it's not the background noise, stop the listening
+
+
+
+    setTimeout(() => model.stopListening(), 3000);
   };
 
   const renderTime = ({ remainingTime }) => {
@@ -180,6 +184,7 @@ const Testing = () => {
       >
         <Grid item xs={12} alignItems="center">
           <Typography variant="h3">Non-Native English ASR</Typography>
+
         </Grid>
         <Paper sx={{ my: 2, p: 2 }}>
           <Grid
@@ -237,6 +242,7 @@ const Testing = () => {
                   }}
                 >
                   {action}
+                  {confidence}
                 </Typography>
               </Typography>
             </Grid>

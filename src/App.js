@@ -1,4 +1,5 @@
 import Testing from "./pages/testing";
+import Native from "./pages/native-page";
 
 import { AppBar, Toolbar, Typography } from "@mui/material";
 
@@ -15,6 +16,23 @@ const App = () => {
               component="div"
               sx={{
                 flexGrow: 1,
+                mr: 3,
+                color: "white",
+                textDecoration: "none",
+                textTransform: "uppercase",
+                underline: "none",
+                boxShadow: "none",
+              }}
+            >
+              Non-Native Speakers
+            </Typography>
+          </Link>
+          <Link to="/native" style={{ textDecoration: "none" }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{
+                flexGrow: 1,
                 mr: 1,
                 color: "white",
                 textDecoration: "none",
@@ -23,13 +41,14 @@ const App = () => {
                 boxShadow: "none",
               }}
             >
-              Home
+              Native Speakers
             </Typography>
           </Link>
         </Toolbar>
       </AppBar>
       <Routes>
         <Route path="/" element={<Testing />} />
+        <Route path="/native" element={<Native />} />
       </Routes>
     </Router>
   );
