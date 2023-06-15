@@ -8,17 +8,17 @@ import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import wordList from "../wordlist/wordList";
 
 const urlArray = [
-  { id: "Act", url: "QCCgmtRNw" },
-  { id: "Bed", url: "4Nx8SytsJ" },
-  { id: "Clap", url: "b0NWJ3mdp" },
-  { id: "Dart", url: "" },
-  { id: "Ear", url: "" },
-  { id: "For", url: "" },
-  { id: "Get", url: "" },
-  { id: "Here", url: "" },
-  { id: "If", url: "" },
-  { id: "Job", url: "" },
-  { id: "Kid", url: "" },
+  { id: "Act", url: "lUUoJ4eWD" },
+  { id: "Bed", url: "5gyDeP39U" },
+  { id: "Clap", url: "VJFFsRFK0" },
+  { id: "Dart", url: "IORhhy9KB" },
+  { id: "Ear", url: "2Z3gspnbb" },
+  { id: "For", url: "zH1ywIUao" },
+  { id: "Get", url: "SyW1yj8vhE" },
+  { id: "Here", url: "3kUzUQdmP" },
+  { id: "If", url: "rGOXDCB5A" },
+  { id: "Job", url: "XYuROWNvL" },
+  { id: "Kid", url: "4ohlxkjOS" },
   { id: "Late", url: "" },
   { id: "Make", url: "" },
   { id: "Name", url: "" },
@@ -140,8 +140,6 @@ const Testing = () => {
 
     //As long it's not the background noise, stop the listening
 
-
-
     setTimeout(() => model.stopListening(), 3000);
   };
 
@@ -242,7 +240,7 @@ const Testing = () => {
                   }}
                 >
                   {action}
-                  {confidence}
+                  <Typography>{confidence}</Typography>
                 </Typography>
               </Typography>
             </Grid>
