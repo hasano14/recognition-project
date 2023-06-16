@@ -89,11 +89,6 @@ const Testing = () => {
       "https://teachablemachine.withgoogle.com/models/" +
       url +
       "/metadata.json";
-
-    // //Offline recognizing
-    // const modelURL = "./Act_Model/model.json";
-    // const metadataURL = "./Act_Model/metadata.json";
-
     const recognizer = speechCommands.create(
       "BROWSER_FFT",
       undefined, //speech commands options not needed for this example
@@ -124,23 +119,44 @@ const Testing = () => {
     setStartCountdown(true);
     setKey((prevKey) => prevKey + 1);
 
-    model.listen(
-      (result) => {
-        setAction(labels[argMax(Object.values(result.scores))]);
-        setConfidence(result.scores[argMax(Object.values(result.scores))]);
-      },
-      {
-        includeSpectrogram: true,
-        //
-        probabilityThreshold: 0.6,
-        invokeCallbackOnNoiseAndUnknown: false,
-        overlapFactor: 0.5,
-      }
-    );
+    setTimeout(() => {
+      model.listen(
+        (result) => {
+          // setAction(labels[argMax(Object.values(result.scores))]);
+          // setConfidence(result.scores[argMax(Object.values(result.scores))]);
 
-    //As long it's not the background noise, stop the listening
+          const scores = Object.values(result.scores);
+          const labelsCopy = [...labels];
 
-    setTimeout(() => model.stopListening(), 3000);
+          const filteredScores = scores.filter((score) => score >= 0.6);
+
+          if (filteredScores.length > 0) {
+            const maxScoreIndex = argMax(filteredScores);
+            const maxScoreLabel =
+              labelsCopy[scores.indexOf(filteredScores[maxScoreIndex])];
+            const maxScore = filteredScores[maxScoreIndex];
+
+            setAction(maxScoreLabel);
+            setConfidence(maxScore);
+
+            if (maxScore >= 0.75 && maxScoreLabel !== "Background Noise") {
+              //Immediately stop the listening
+              model.stopListening();
+            }
+          }
+        },
+        {
+          includeSpectrogram: true,
+          probabilityThreshold: 0.6,
+          invokeCallbackOnNoiseAndUnknown: false,
+          overlapFactor: 0.5,
+        }
+      );
+
+      //As long it's not the background noise, stop the listening
+
+      setTimeout(() => model.stopListening(), 3000);
+    }, 2000);
   };
 
   const renderTime = ({ remainingTime }) => {
@@ -182,7 +198,6 @@ const Testing = () => {
       >
         <Grid item xs={12} alignItems="center">
           <Typography variant="h3">Non-Native English ASR</Typography>
-
         </Grid>
         <Paper sx={{ my: 2, p: 2 }}>
           <Grid

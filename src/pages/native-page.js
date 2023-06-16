@@ -118,14 +118,36 @@ const Testing = () => {
   const recognizeWords = async () => {
     console.log("Recognizing words");
     setAction(null);
+    setButton(true);
 
     setStartCountdown(true);
     setKey((prevKey) => prevKey + 1);
 
     model.listen(
       (result) => {
-        setAction(labels[argMax(Object.values(result.scores))]);
-        setConfidence(result.scores[argMax(Object.values(result.scores))]);
+        // setAction(labels[argMax(Object.values(result.scores))]);
+        // setConfidence(result.scores[argMax(Object.values(result.scores))]);
+
+        const scores = Object.values(result.scores);
+        const labelsCopy = [...labels];
+
+        const filteredScores = scores.filter((score) => score >= 0.6);
+
+        if (filteredScores.length > 0) {
+          const maxScoreIndex = argMax(filteredScores);
+          const maxScoreLabel =
+            labelsCopy[scores.indexOf(filteredScores[maxScoreIndex])];
+          const maxScore = filteredScores[maxScoreIndex];
+
+          setAction(maxScoreLabel);
+          setConfidence(maxScore);
+
+          if (maxScore >= 0.75 && maxScoreLabel !== "Background Noise") {
+            //Immediately stop the listening
+            model.stopListening();
+            setButton(false);
+          }
+        }
       },
       {
         includeSpectrogram: true,
@@ -134,39 +156,6 @@ const Testing = () => {
         overlapFactor: 0.5,
       }
     );
-
-    //stop model listening after 2 seconds
-    setTimeout(() => {
-      model.stopListening();
-    }, 2000);
-  };
-
-  const renderTime = ({ remainingTime }) => {
-    if (remainingTime === 0) {
-      return (
-        <Button variant="contained" onClick={recognizeWords} disabled={button}>
-          Try Again
-        </Button>
-      );
-    } else {
-      return (
-        <>
-          {startCountdown ? (
-            <Button variant="contained" disabled>
-              {remainingTime}
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              onClick={recognizeWords}
-              disabled={button}
-            >
-              Start
-            </Button>
-          )}
-        </>
-      );
-    }
   };
 
   return (
@@ -197,16 +186,13 @@ const Testing = () => {
             <Grid item xs={12} sx={{ py: 2 }}>
               <div className="timer-wrapper">
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
-                  <CountdownCircleTimer
-                    key={key}
-                    isPlaying={startCountdown}
-                    duration={2}
-                    colors={["#004777"]}
-                    onComplete={() => ({ shouldRepeat: false })}
-                    display="flex"
+                  <Button
+                    variant="contained"
+                    onClick={recognizeWords}
+                    disabled={button}
                   >
-                    {renderTime}
-                  </CountdownCircleTimer>
+                    Start
+                  </Button>
                 </Box>
               </div>
             </Grid>
@@ -237,7 +223,6 @@ const Testing = () => {
                   }}
                 >
                   {action}
-                  <Typography>{confidence}</Typography>
                 </Typography>
               </Typography>
             </Grid>
