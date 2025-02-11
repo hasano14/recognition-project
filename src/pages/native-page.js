@@ -1,5 +1,3 @@
-//TODO: 1. Add a delay of 2 seconds before the recording starts
-
 import { useState, useEffect } from "react";
 import * as speechCommands from "@tensorflow-models/speech-commands";
 import * as tf from "@tensorflow/tfjs";
@@ -125,9 +123,6 @@ const Testing = () => {
 
     model.listen(
       (result) => {
-        // setAction(labels[argMax(Object.values(result.scores))]);
-        // setConfidence(result.scores[argMax(Object.values(result.scores))]);
-
         const scores = Object.values(result.scores);
         const labelsCopy = [...labels];
 
@@ -141,7 +136,8 @@ const Testing = () => {
 
           setAction(maxScoreLabel);
           setConfidence(maxScore);
-
+          //Highlight this point
+          //Check if the maxScore is more than 75% and will avoid to get background noise
           if (maxScore >= 0.75 && maxScoreLabel !== "Background Noise") {
             //Immediately stop the listening
             model.stopListening();
@@ -180,7 +176,7 @@ const Testing = () => {
           >
             <Grid item xs={12}>
               <Typography variant="h6" sx={{ py: 2 }}>
-                Test your pronunciation if it is understandable by the machine
+                Check your pronunciation with native English speakers
               </Typography>
             </Grid>
             <Grid item xs={12} sx={{ py: 2 }}>
